@@ -1,0 +1,16 @@
+[project]
+name = "storefront-monitor"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "alexl8819",email = "124635195+alexl8819@users.noreply.github.com"}
+]
+requires-python = ">=3.14"
+dependencies = [
+    "ebaysdk (>=2.2.0,<3.0.0)",
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
