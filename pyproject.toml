@@ -5,9 +5,12 @@ description = ""
 authors = [
     {name = "alexl8819",email = "124635195+alexl8819@users.noreply.github.com"}
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.14,<4.0"
 dependencies = [
     "ebaysdk (>=2.2.0,<3.0.0)",
+    "upstash-redis (>=1.7.0,<2.0.0)",
+    "asyncio (>=4.0.0,<5.0.0)",
+    "secure-dotenv (>=0.1.1,<0.2.0)",
 ]
 
 
