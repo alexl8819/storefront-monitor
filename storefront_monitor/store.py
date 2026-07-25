@@ -1,3 +1,4 @@
+from os import getenv
 from datetime import datetime, timezone
 import datetime as dt
 import asyncio
@@ -22,10 +23,17 @@ def _parse_item(item) -> dict:
 
     return reduced_item
 
-def list_inventory(config, start_time=datetime.today()) -> [dict]:
+def list_inventory(start_time=datetime.today()) -> [dict]:
     end_time = dt.timedelta(days=30) + start_time
     
-    api = Trading(config_file=config)
+    api = Trading(
+        domain='api.ebay.com',
+        appid=getenv('appid'),
+        certid=getenv('certid'),
+        devid=getenv('devid'),
+        token=getenv('token'),
+        config_file=None
+    )
     response = api.execute('GetSellerList', {
         'EndTimeFrom': start_time.isoformat(),
         'EndTimeTo': end_time.isoformat()
@@ -51,10 +59,8 @@ def list_inventory(config, start_time=datetime.today()) -> [dict]:
     return inv
 
 async def main():
-    inv = list_inventory(config='./ebay-credentials.yaml')
+    inv = list_inventory()
     client = create_client()
-
-    print(inv)
 
     if len(inv) == 0:
         inv = await get_saved(client, '-storefrontmonitor-current')
