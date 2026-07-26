@@ -1,5 +1,8 @@
 *.yaml
+*.txt
 .env
 # Added by secure_dotenv
 .secure-env-id
 __pycache__
+build
+dist
