@@ -16,6 +16,7 @@ def _parse_item(item) -> dict:
     reduced_item = {}
     reduced_item['title'] = item['Title']
     reduced_item['quantity'] = int(item['Quantity']) or 1
+    reduced_item['category_sku'] = item['SKU']
     reduced_item['price'] = item['ListingDetails']['ConvertedStartPrice']['value']
     reduced_item['listing_url'] = item['ListingDetails']['ViewItemURL']
     reduced_item['main_screenshot'] = item['PictureDetails']['PictureURL']
@@ -61,7 +62,7 @@ def list_inventory(start_time=datetime.today()) -> [dict]:
 async def main():
     inv = list_inventory()
     client = create_client()
-
+    
     if len(inv) == 0:
         inv = await get_saved(client, '-storefrontmonitor-current')
         print(inv)
