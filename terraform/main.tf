@@ -32,6 +32,7 @@ resource "aws_lambda_function" "update_inventory" {
   role             = aws_iam_role.lambda_exec.arn
   handler          = "update_inventory.handler"
   runtime          = "python3.14"
+  timeout          = 60
 
   environment {
     variables = {
