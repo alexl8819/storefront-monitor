@@ -17,7 +17,7 @@ def _parse_item(item) -> dict:
     reduced_item['title'] = item['Title']
     reduced_item['quantity'] = int(item['Quantity']) or 1
     reduced_item['category_sku'] = item['SKU']
-    reduced_item['price'] = item['ListingDetails']['ConvertedStartPrice']['value']
+    reduced_item['price'] = float(item['ListingDetails']['ConvertedStartPrice']['value']) or 0.00
     reduced_item['listing_url'] = item['ListingDetails']['ViewItemURL']
     reduced_item['main_screenshot'] = item['PictureDetails']['PictureURL']
     reduced_item['returns_policy'] = item['ReturnPolicy']
