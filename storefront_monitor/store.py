@@ -4,7 +4,7 @@ import datetime as dt
 import asyncio
 from secure_dotenv import load_dotenv
 
-from storefront_monitor.cache import create_client, batch_save, get_saved
+from storefront_monitor.cache import batch_save
 
 from ebaysdk.trading import Connection as Trading
 
@@ -60,15 +60,7 @@ def list_inventory(start_time=datetime.today()) -> [dict]:
     return inv
 
 async def main():
-    inv = list_inventory()
-    client = create_client()
-    
-    if len(inv) == 0:
-        inv = await get_saved(client, '-storefrontmonitor-current')
-        print(inv)
-        print('No items found in batch.')
-
-    await batch_save(client, '-storefrontmonitor-current', inv)
+    await batch_save('-storefrontmonitor-current', list_inventory())
     print('Updated inventory')
 
 if __name__ == "__main__":
