@@ -10,22 +10,28 @@ from ebaysdk.trading import Connection as Trading
 
 load_dotenv()
 
+MAX_ITEMS_PER_PAGE = 200
+MAX_FUTURE_DAYS_DELTA = 90
+
 def _parse_item(item) -> dict:
     item = item['Item']
 
     reduced_item = {}
     reduced_item['title'] = item['Title']
+    reduced_item['status'] = item['SellingStatus']['ListingStatus']
     reduced_item['quantity'] = int(item['Quantity']) or 1
+    reduced_item['quantity_sold'] = int(item['SellingStatus']['QuantitySold']) or 0
     reduced_item['category_sku'] = item['SKU']
     reduced_item['price'] = float(item['ListingDetails']['ConvertedStartPrice']['value']) or 0.00
     reduced_item['listing_url'] = item['ListingDetails']['ViewItemURL']
+    reduced_item['time_left'] = item['TimeLeft']
     reduced_item['main_screenshot'] = item['PictureDetails']['PictureURL']
     reduced_item['returns_policy'] = item['ReturnPolicy']
 
     return reduced_item
 
-def list_inventory(start_time=datetime.today()) -> [dict]:
-    end_time = dt.timedelta(days=30) + start_time
+def list_inventory(start_time=datetime.today(), page = 1, inv = []) -> [dict]:
+    end_time = dt.timedelta(days=MAX_FUTURE_DAYS_DELTA) + start_time
     
     api = Trading(
         domain='api.ebay.com',
@@ -35,32 +41,36 @@ def list_inventory(start_time=datetime.today()) -> [dict]:
         token=getenv('token'),
         config_file=None
     )
-    response = api.execute('GetSellerList', {
+    response = api.execute('GetSellerList', { # Assume 200 listing per page
         'EndTimeFrom': start_time.isoformat(),
-        'EndTimeTo': end_time.isoformat()
+        'EndTimeTo': end_time.isoformat(),
+        'GranularityLevel': 'Coarse',
+        'Pagination': {
+            'EntriesPerPage': MAX_ITEMS_PER_PAGE,
+            'PageNumber': page
+        }
     })
+
     s_list = response.dict()
+    items = s_list['ItemArray']['Item']
 
-    items = s_list['ItemArray']
-    inv = []
-
-    if isinstance(items, dict):
+    for item in items:
         item_response = api.execute('GetItem', {
-            'ItemID': items['Item']['ItemID']
+            'ItemID': item['ItemID']
         })
+
         inv.append(_parse_item(item_response.dict()))
-    else:
-        for item in items:
-            i = items[item]
-            for it in i:
-                item_response = api.execute('GetItem', { 
-                    'ItemID': it['ItemID']
-                })
-                inv.append(_parse_item(item_response.dict()))
+
+    if len(items) >= MAX_ITEMS_PER_PAGE:
+        return list_inventory(start_time, page + 1, inv)
+
     return inv
 
 async def main():
-    await batch_save('-storefrontmonitor-current', list_inventory())
+    await batch_save(getenv('inventory_key'), dict({
+        'last_updated': datetime.now().isoformat(),
+        'items': list_inventory()
+    }))
     print('Updated inventory')
 
 if __name__ == "__main__":
