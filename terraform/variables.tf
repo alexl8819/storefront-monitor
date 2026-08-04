@@ -25,6 +25,11 @@ variable "token" {
   type        = string
 }
 
+variable "inventory_key" {
+  description = "Key used to derive inventory"
+  type        = string
+}
+
 variable "UPSTASH_REDIS_REST_URL" {
   description = "Upstash redis REST url"
   type        = string

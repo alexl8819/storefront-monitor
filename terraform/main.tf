@@ -40,6 +40,7 @@ resource "aws_lambda_function" "update_inventory" {
       devid = var.devid
       certid = var.certid
       token = var.token
+      inventory_key = var.inventory_key
       UPSTASH_REDIS_REST_URL = var.UPSTASH_REDIS_REST_URL
       UPSTASH_REDIS_REST_TOKEN = var.UPSTASH_REDIS_REST_TOKEN
     }
