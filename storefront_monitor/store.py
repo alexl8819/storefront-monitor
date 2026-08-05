@@ -6,6 +6,7 @@ from secure_dotenv import load_dotenv
 
 from storefront_monitor.cache import batch_save
 
+from bs4 import BeautifulSoup
 from ebaysdk.trading import Connection as Trading
 
 load_dotenv()
@@ -13,16 +14,21 @@ load_dotenv()
 MAX_ITEMS_PER_PAGE = 200
 MAX_FUTURE_DAYS_DELTA = 90
 
+def _clean_listing_formatting(text):
+    return BeautifulSoup(text, 'html.parser').get_text('\n', strip=True)
+
 def _parse_item(item) -> dict:
     item = item['Item']
 
     reduced_item = {}
     reduced_item['title'] = item['Title']
+    reduced_item['description'] = _clean_listing_formatting(item['Description'])
     reduced_item['status'] = item['SellingStatus']['ListingStatus']
     reduced_item['quantity'] = int(item['Quantity']) or 1
     reduced_item['quantity_sold'] = int(item['SellingStatus']['QuantitySold']) or 0
     reduced_item['category_sku'] = item['SKU']
     reduced_item['price'] = float(item['ListingDetails']['ConvertedStartPrice']['value']) or 0.00
+    reduced_item['condition'] = item['ConditionDescription']
     reduced_item['listing_url'] = item['ListingDetails']['ViewItemURL']
     reduced_item['time_left'] = item['TimeLeft']
     reduced_item['main_screenshot'] = item['PictureDetails']['PictureURL']
@@ -56,7 +62,8 @@ def list_inventory(start_time=datetime.today(), page = 1, inv = []) -> [dict]:
 
     for item in items:
         item_response = api.execute('GetItem', {
-            'ItemID': item['ItemID']
+            'ItemID': item['ItemID'],
+            'DetailLevel': 'ItemReturnDescription'
         })
 
         inv.append(_parse_item(item_response.dict()))
