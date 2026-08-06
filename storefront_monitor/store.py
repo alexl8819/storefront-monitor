@@ -28,7 +28,8 @@ def _parse_item(item) -> dict:
     reduced_item['quantity_sold'] = int(item['SellingStatus']['QuantitySold']) or 0
     reduced_item['category_sku'] = item['SKU']
     reduced_item['price'] = float(item['ListingDetails']['ConvertedStartPrice']['value']) or 0.00
-    reduced_item['condition'] = item['ConditionDescription']
+    reduced_item['condition'] = item['ConditionDisplayName']
+    reduced_item['condition_description'] = item['ConditionDescription'] if 'ConditionDescription' in item else 'N/A'
     reduced_item['listing_url'] = item['ListingDetails']['ViewItemURL']
     reduced_item['time_left'] = item['TimeLeft']
     reduced_item['main_screenshot'] = item['PictureDetails']['PictureURL']
