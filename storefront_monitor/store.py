@@ -64,7 +64,8 @@ def list_inventory(start_time=datetime.today(), page = 1, inv = []) -> [dict]:
     for item in items:
         item_response = api.execute('GetItem', {
             'ItemID': item['ItemID'],
-            'DetailLevel': 'ItemReturnDescription'
+            'DetailLevel': 'ReturnAll',
+            'IncludeItemSpecifics': True
         })
 
         inv.append(_parse_item(item_response.dict()))
